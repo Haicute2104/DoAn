@@ -1,0 +1,160 @@
+/* ============================================
+   Products Page - Đồng nhất với Categories
+   ============================================ */
+
+.page-container {
+  display: flex;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.main-card {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* Header Layout */
+.header-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .header-wrapper {
+    flex-direction: row;
+  }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon-box {
+  background-color: #1890ff;
+  padding: 8px;
+  border-radius: 8px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .header-actions {
+    width: auto;
+  }
+}
+
+.search-input {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .search-input {
+    width: 250px;
+  }
+}
+
+/* Bulk Actions */
+.bulk-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+/* Table Styles */
+.ant-table-thead > tr > th {
+  font-weight: 600;
+  text-align: center;
+}
+
+.ant-table-tbody > tr > td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+th.ant-table-cell, td.ant-table-cell {
+  text-align: center;
+}
+
+/* Ảnh trong bảng */
+.table-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.table-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.ant-image .ant-image-img img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Tag styles */
+.ant-tag {
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* Product name column */
+.col-product-name {
+  max-width: 200px;  
+  -webkit-line-clamp: 2;      
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Modal Styles */
+.modal-title-custom {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+/* Pagination */
+.ant-pagination {
+  margin-top: 16px;
+}
+
+/* Links */
+.ant-table a {
+  color: #1677ff;
+  font-weight: 500;
+}
+
+.ant-table a:hover {
+  text-decoration: underline;
+}

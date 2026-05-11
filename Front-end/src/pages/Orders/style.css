@@ -1,0 +1,142 @@
+/* ============================================
+   Orders Page - Đồng nhất với Products/Categories
+   ============================================ */
+
+.page-container {
+  display: flex;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.main-card {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* Header Layout */
+.header-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .header-wrapper {
+    flex-direction: row;
+  }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon-box {
+  background-color: #1890ff;
+  padding: 8px;
+  border-radius: 8px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-right {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .header-right {
+    width: auto;
+  }
+}
+
+.search-input {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .search-input {
+    width: 300px;
+  }
+}
+
+/* CUSTOMER */
+.customer-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.customer-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.customer-phone {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ITEMS */
+.items-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-text {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.item-more {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* PAYMENT */
+.payment-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.payment-method {
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+/* ORDER */
+.order-code {
+  font-weight: 600;
+  color: #900c3f;
+}
+
+/* MONEY */
+.total-amount {
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Tag styles */
+.ant-tag {
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* Pagination */
+.ant-pagination {
+  margin-top: 16px;
+}

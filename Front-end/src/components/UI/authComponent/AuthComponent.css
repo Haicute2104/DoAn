@@ -1,0 +1,304 @@
+.auth {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.5s ease-in-out;
+}
+
+.form-login-transition {
+  width: 100%;
+  height: 60vh;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  overflow: hidden;
+  position: relative;
+  backdrop-filter: blur(20px);
+  background: white;
+}
+
+.login-section,
+.register-section,
+.forgot-section {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.login-section {
+  padding-left: 16px;
+}
+
+.register-section,
+.forgot-section {
+  padding-right: 16px;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.slogan-section {
+  background-color: #0c4a6e;
+  border-radius: 160px 0 0 160px;
+  padding-right: 32px;
+  width: 50%;
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  color: white;
+}
+
+.slogan-section.right-section {
+  border-radius: 0 160px 160px 0;
+  padding-left: 32px;
+  align-items: flex-start;
+}
+
+.slogan-section h3 {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  margin: 0;
+}
+
+.slogan-section p {
+  text-align: center;
+  font-size: 14px;
+  color: white;
+  margin: 0;
+}
+
+.bg-color {
+  background-color: #0c4a6e;
+  border-radius: 160px 0 0 160px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 49%;
+  z-index: -1;
+}
+
+.bg-color.right-section {
+  border-radius: 0 160px 160px 0;
+  left: 0;
+}
+
+.form-footer {
+  text-align: center;
+  color: #666;
+}
+
+.link-text {
+  color: #1890ff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.link-text:hover {
+  text-decoration: underline;
+}
+
+@media (min-width: 768px) {
+  .slogan-section {
+    display: flex;
+  }
+}
+
+/* Login Animation */
+.animation-login .bg-color {
+  border-radius: 160px 0 0 160px;
+  right: 0;
+  animation: bgColor 0.5s ease-in-out;
+}
+
+.animation-login .bg-color.right-section {
+  animation: reverseBgColor 0.5s ease-in-out forwards;
+  border-radius: 0 160px 160px 0;
+  left: 0;
+}
+
+.animation-login .login-section {
+  animation: slideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-login .slogan-section:not(.right-section) {
+  animation: slideRight 0.5s ease-in-out forwards;
+}
+
+.animation-login .slogan-section.right-section {
+  animation: reverseSlideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-login .register-section {
+  animation: reverseSlideRight 0.5s ease-in-out forwards;
+}
+
+/* Register Animation */
+.animation-register .bg-color {
+  border-radius: 160px 0 0 160px;
+  right: 0;
+  animation: reverseBgColor 0.5s ease-in-out;
+}
+
+.animation-register .bg-color.right-section {
+  animation: bgColor 0.5s ease-in-out forwards;
+  border-radius: 0 160px 160px 0;
+  left: 0;
+}
+
+.animation-register .register-section {
+  animation: slideRight 0.5s ease-in-out forwards;
+}
+
+.animation-register .slogan-section {
+  animation: reverseSlideRight 0.5s ease-in-out forwards;
+}
+
+.animation-register .slogan-section.right-section {
+  animation: slideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-register .login-section {
+  animation: reverseSlideLeft 0.5s ease-in-out forwards;
+}
+
+/* Forgot Animation */
+.animation-forgot .bg-color {
+  border-radius: 160px 0 0 160px;
+  right: 0;
+  animation: bgColor 0.5s ease-in-out;
+}
+
+.animation-forgot .bg-color.right-section {
+  animation: reverseBgColor 0.5s ease-in-out forwards;
+  border-radius: 0 160px 160px 0;
+  left: 0;
+}
+
+.animation-forgot .login-section {
+  animation: slideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-forgot .slogan-section:not(.right-section) {
+  animation: slideRight 0.5s ease-in-out forwards;
+}
+
+.animation-forgot .slogan-section.right-section {
+  animation: reverseSlideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-forgot .forgot-section {
+  animation: reverseSlideRight 0.5s ease-in-out forwards;
+}
+
+/* Forgot to Login Animation */
+.animation-forgot-to-login .bg-color {
+  border-radius: 160px 0 0 160px;
+  right: 0;
+  animation: reverseBgColor 0.5s ease-in-out;
+}
+
+.animation-forgot-to-login .bg-color.right-section {
+  animation: bgColor 0.5s ease-in-out forwards;
+  border-radius: 0 160px 160px 0;
+  left: 0;
+}
+
+.animation-forgot-to-login .forgot-section {
+  animation: slideRight 0.5s ease-in-out forwards;
+}
+
+.animation-forgot-to-login .slogan-section {
+  animation: reverseSlideRight 0.5s ease-in-out forwards;
+}
+
+.animation-forgot-to-login .slogan-section.right-section {
+  animation: slideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-forgot-to-login .login-section {
+  animation: reverseSlideLeft 0.5s ease-in-out forwards;
+}
+
+/* Keyframes */
+@keyframes bgColor {
+  from {
+    width: 49%;
+  }
+  to {
+    width: 120%;
+  }
+}
+
+@keyframes reverseBgColor {
+  from {
+    width: 120%;
+  }
+  to {
+    width: 49%;
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(-140%);
+  }
+}
+
+@keyframes reverseSlideLeft {
+  from {
+    transform: translateX(-140%);
+  }
+  to {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes reverseSlideRight {
+  from {
+    transform: translateX(140%);
+  }
+  to {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(140%);
+  }
+}
+
+.login-form {
+  width: 70%;
+}
+.register-form {
+  width: 70%;
+}
+.forgot-form {
+  width: 70%;
+}

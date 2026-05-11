@@ -1,0 +1,41 @@
+export const templateActivateAccount = (activateLink: string, userName: string) => {
+  return `
+    <!doctype html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="font-family:Arial,sans-serif;background:#f3f4f6;margin:0;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:28px 0;">
+    <tr><td align="center">
+      <table width="580" style="background:#fff;border-radius:8px;overflow:hidden;">
+        <tr><td style="padding:20px 24px;background:#16a34a;color:#fff;font-weight:700;">Kích hoạt tài khoản</td></tr>
+        <tr><td style="padding:20px;color:#111;">
+          
+          <p>Xin chào <strong>${userName}</strong>,</p>
+          <p>Cảm ơn bạn đã đăng ký tài khoản. Vui lòng nhấn nút bên dưới để kích hoạt tài khoản của bạn (hết hạn sau 1 giờ):</p>
+
+          <p style="text-align:center;margin:20px 0;">
+            <a href="${activateLink}" style="padding:12px 20px;border-radius:6px;background:#16a34a;color:#fff;text-decoration:none;font-weight:600;">Kích hoạt tài khoản</a>
+          </p>
+
+          <p>Nếu bạn không đăng ký tài khoản này, hãy bỏ qua email này.</p>
+          <p>${activateLink}</p>
+
+          <p>Trân trọng,<br/>[TÊN SHOP]</p>
+
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>
+  `;
+};
+
+
+
+
+
+
+
+
+
+
+
+

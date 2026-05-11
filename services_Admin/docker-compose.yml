@@ -1,0 +1,388 @@
+services:
+  # MongoDB Database - COMMENTED OUT (Using MongoDB Atlas)
+  # mongodb:
+  #   image: mongo:7
+  #   container_name: mongodb
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #   networks:
+  #     - admin-network
+  #   restart: unless-stopped
+  #   environment:
+  #     - MONGO_INITDB_DATABASE=admin_db
+
+  # Redis Cache - COMMENTED OUT (Using Redis Upstash)
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - admin-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Zookeeper (for Kafka)
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - admin-network
+    restart: unless-stopped
+
+  # Kafka
+  kafka:
+    image: wurstmeister/kafka:latest
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "send-mail:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - admin-network
+    restart: unless-stopped
+
+  # Auth Service
+  auth:
+    build:
+      context: ./auth_services
+      dockerfile: Dockerfile
+      args:
+        PORT: 5000
+    container_name: auth-service
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - MONGO_URL=${MONGO_URL_AUTH}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      # Token expiration times
+      - ACCESS_TOKEN_EXPIRE=${ACCESS_TOKEN_EXPIRE:-1h}
+      - REFRESH_TOKEN_EXPIRE=${REFRESH_TOKEN_EXPIRE:-30d}
+      - ACTIVATE_TOKEN_EXPIRE=${ACTIVATE_TOKEN_EXPIRE:-1h}
+      - RESET_PASSWORD_TOKEN_EXPIRE=${RESET_PASSWORD_TOKEN_EXPIRE:-15m}
+      # Cookie configuration
+      - COOKIE_MAX_AGE=${COOKIE_MAX_AGE:-30d}
+      - COOKIE_SAME_SITE=${COOKIE_SAME_SITE:-lax}
+      # Other
+      - Kafka_Broker=kafka:9092
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:5173}
+    networks:
+      - admin-network
+    depends_on:
+      kafka:
+        condition: service_started
+      user:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # User Service
+  user:
+    build:
+      context: ./user_services
+      dockerfile: Dockerfile
+      args:
+        PORT: 5002
+    container_name: user-service
+    ports:
+      - "5002:5002"
+    environment:
+      - PORT=5002
+      - NODE_ENV=production
+      - MONGO_URL=${MONGO_URL_USER}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - AUTH_SERVICE_URL=http://auth:5000/api/v1/client/auth
+      - CLOUDINARY_URL=http://share:5001/api/v1
+      - ORDER_SERVICE_URL=http://order:5004
+      - USER_SERVICE_URL=http://user:5002/api/v1/admin/user
+    networks:
+      - admin-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  # Share Service (Upload/Image)
+  share:
+    build:
+      context: ./share_services
+      dockerfile: Dockerfile
+      args:
+        PORT: 5001
+    container_name: share-service
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - NODE_ENV=production
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - Kafka_Broker=kafka:9092
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+    networks:
+      - admin-network
+    depends_on:
+      - kafka
+    restart: unless-stopped
+
+  # Products Service
+  products:
+    build:
+      context: ./products_services
+      dockerfile: Dockerfile
+      args:
+        PORT: 5003
+    container_name: products-service
+    ports:
+      - "5003:5003"
+    environment:
+      - PORT=5003
+      - NODE_ENV=production
+      - MONGO_URL=${MONGO_URL_PRODUCTS}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+    networks:
+      - admin-network
+    depends_on:
+      share:
+        condition: service_started
+      user:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Order Service
+  order:
+    build:
+      context: ./order_services
+      dockerfile: Dockerfile
+      args:
+        PORT: 5004
+    container_name: order-service
+    ports:
+      - "5004:5004"
+    environment:
+      - PORT=5004
+      - NODE_ENV=production
+      - MONGO_URL=${MONGO_URL_ORDER}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - CART_SERVICE_URL=http://cart:5005/api/v1/client/cart
+      - PRODUCT_SERVICE_URL=http://products:5003/api/v1/client/product
+      - USER_SERVICE_URL=http://user:5002
+    networks:
+      - admin-network
+    depends_on:
+      products:
+        condition: service_started
+      cart:
+        condition: service_started
+      share:
+        condition: service_started
+      user:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Cart Service
+  cart:
+    build:
+      context: ./cart_services
+      dockerfile: Dockerfile
+      args:
+        PORT: 5005
+    container_name: cart-service
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+      - NODE_ENV=production
+      - MONGO_URL=${MONGO_URL_CART}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - PRODUCT_SERVICE_URL=http://products:5003/api/v1
+    networks:
+      - admin-network
+    depends_on:
+      - products
+    restart: unless-stopped
+
+  # Contact Service
+  contact:
+    build:
+      context: ./contact_services
+      dockerfile: Dockerfile
+      args:
+        PORT: 5010
+    container_name: contact-service
+    ports:
+      - "5010:5010"
+    environment:
+      - PORT=5010
+      - NODE_ENV=production
+      - MONGO_URL=${MONGO_URL_CONTACT}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+    networks:
+      - admin-network
+    depends_on:
+      - share
+    restart: unless-stopped
+
+  # Payment Service
+  payment:
+    build:
+      context: ./payment_services
+      dockerfile: Dockerfile
+      args:
+        PORT: 5006
+    container_name: payment-service
+    ports:
+      - "5006:5006"
+    environment:
+      - PORT=5006
+      - NODE_ENV=production
+      - MONGO_URL=${MONGO_URL_PAYMENT}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - MOMO_PARTNER_CODE=${MOMO_PARTNER_CODE:-MOMO}
+      - MOMO_ACCESS_KEY=${MOMO_ACCESS_KEY}
+      - MOMO_SECRET_KEY=${MOMO_SECRET_KEY}
+      - MOMO_REDIRECT_URL=${MOMO_REDIRECT_URL:-http://localhost/api/client/payment/momo/redirect}
+      - MOMO_IPN_URL=${MOMO_IPN_URL:-http://localhost/api/client/payment/momo/callback}
+      - MOMO_FRONTEND_URL=${MOMO_FRONTEND_URL:-http://localhost:3000/payment-success}
+      - ORDER_SERVICE_URL=http://order:5004
+    networks:
+      - admin-network
+    depends_on:
+      order:
+        condition: service_started
+      user:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # News Service
+  news:
+    build:
+      context: ./news_services
+      dockerfile: Dockerfile
+      args:
+        PORT: 5011
+    container_name: news-service
+    ports:
+      - "5011:5011"
+    environment:
+      - PORT=5011
+      - NODE_ENV=production
+      - MONGO_URL=${MONGO_URL_NEWS}
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - USER_SERVICE_URL=http://user:5002/internal/user
+      - AI_SERVICE_URL=http://ai:5012/ai
+      - SHARE_SERVICE_URL=http://share:5001/api/v1
+    networks:
+      - admin-network
+    depends_on:
+      - share
+      - user
+    restart: unless-stopped
+
+  # AI Service
+  ai:
+    build:
+      context: ./AI_services
+      dockerfile: Dockerfile
+      args:
+        PORT: 5012
+    container_name: ai-service
+    ports:
+      - "5012:5012"
+    environment:
+      - PORT=5012
+      - NODE_ENV=production
+      - MONGO_URL=${MONGO_URL_AI}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - OPENAI_API_KEY=${GITHUB_TOKEN}
+      - PRODUCT_SERVICE_URL=http://products:5003/api/v1/client
+      - ORDER_SERVICE_URL=http://order:5004
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+      - LANGSMITH_TRACING=true
+      - LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_PROJECT=DoAn
+    networks:
+      - admin-network
+    depends_on:
+      - products
+      - order
+    restart: unless-stopped
+
+  # Report Service
+  report:
+    build:
+      context: ./report_services
+      dockerfile: Dockerfile
+      args:
+        PORT: 5014
+    container_name: report-service
+    ports:
+      - "5014:5014"
+    environment:
+      - PORT=5014
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - ORDER_SERVICE_URL=http://order:5004
+      - PRODUCT_SERVICE_URL=http://products:5003
+    networks:
+      - admin-network
+    depends_on:
+      - order
+      - products
+    restart: unless-stopped
+
+  # API Gateway (Nginx)
+  api_gateway:
+    image: nginx:alpine
+    container_name: api-gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./api_gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - admin-network
+    depends_on:
+      - auth
+      - order
+      - products
+      - share
+      - user
+      - cart
+      - contact
+      - payment
+      - news
+      - ai
+      - report
+    restart: unless-stopped
+
+networks:
+  admin-network:
+    driver: bridge
+
+# Volumes - COMMENTED OUT (Using MongoDB Atlas and Redis Upstash)
+volumes:
+  # mongodb_data:
+  redis_data:

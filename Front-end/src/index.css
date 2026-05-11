@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders:opsz,wght@10..72,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+}
+
+a{
+  text-decoration: none;
+  color: inherit;
+}
+body{
+  min-height: 100vh;
+}
+.ant-form-item-control-input-content{
+  width: 100%;
+  display: block;
+}
+.ant-form-item .ant-form-item-control-input-content{
+  width: 100%;
+  display: block;
+}

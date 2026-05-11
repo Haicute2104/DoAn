@@ -1,0 +1,147 @@
+.bg-color {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 49%;
+  z-index: -1;
+  background-color: #0c4a6e;
+  border-radius: 160px 0 0 160px;
+}
+
+.bg-color.right-section {
+  border-radius: 0 160px 160px 0;
+  left: 0;
+  right: auto;
+}
+
+/* Login Animation */
+.animation-login .bg-color {
+  animation: bgColor 0.5s ease-in-out;
+}
+
+.animation-login .bg-color.right-section {
+  animation: reverseBgColor 0.5s ease-in-out forwards;
+}
+
+.animation-login .login-section {
+  animation: slideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-login .slogan-section:not(.right-section) {
+  animation: slideRight 0.5s ease-in-out forwards;
+}
+
+.animation-login .slogan-section.right-section {
+  animation: reverseSlideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-login .register-section {
+  animation: reverseSlideRight 0.5s ease-in-out forwards;
+}
+
+/* Register Animation */
+.animation-register .bg-color {
+  animation: reverseBgColor 0.5s ease-in-out;
+}
+
+.animation-register .bg-color.right-section {
+  animation: bgColor 0.5s ease-in-out forwards;
+}
+
+.animation-register .register-section {
+  animation: slideRight 0.5s ease-in-out forwards;
+}
+
+.animation-register .slogan-section {
+  animation: reverseSlideRight 0.5s ease-in-out forwards;
+}
+
+.animation-register .slogan-section.right-section {
+  animation: slideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-register .login-section {
+  animation: reverseSlideLeft 0.5s ease-in-out forwards;
+}
+
+/* Forgot Animation */
+.animation-forgot .bg-color {
+  animation: bgColor 0.5s ease-in-out;
+}
+
+.animation-forgot .bg-color.right-section {
+  animation: reverseBgColor 0.5s ease-in-out forwards;
+}
+
+.animation-forgot .login-section {
+  animation: slideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-forgot .slogan-section:not(.right-section) {
+  animation: slideRight 0.5s ease-in-out forwards;
+}
+
+.animation-forgot .slogan-section.right-section {
+  animation: reverseSlideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-forgot .forgot-section {
+  animation: reverseSlideRight 0.5s ease-in-out forwards;
+}
+
+/* Forgot to Login Animation */
+.animation-forgot-to-login .bg-color {
+  animation: reverseBgColor 0.5s ease-in-out;
+}
+
+.animation-forgot-to-login .bg-color.right-section {
+  animation: bgColor 0.5s ease-in-out forwards;
+}
+
+.animation-forgot-to-login .forgot-section {
+  animation: slideRight 0.5s ease-in-out forwards;
+}
+
+.animation-forgot-to-login .slogan-section {
+  animation: reverseSlideRight 0.5s ease-in-out forwards;
+}
+
+.animation-forgot-to-login .slogan-section.right-section {
+  animation: slideLeft 0.5s ease-in-out forwards;
+}
+
+.animation-forgot-to-login .login-section {
+  animation: reverseSlideLeft 0.5s ease-in-out forwards;
+}
+
+/* Keyframes */
+@keyframes bgColor {
+  from { width: 49%; }
+  to { width: 120%; }
+}
+
+@keyframes reverseBgColor {
+  from { width: 120%; }
+  to { width: 49%; }
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(0%); }
+  to { transform: translateX(-140%); }
+}
+
+@keyframes reverseSlideLeft {
+  from { transform: translateX(-140%); }
+  to { transform: translateX(0%); }
+}
+
+@keyframes reverseSlideRight {
+  from { transform: translateX(140%); }
+  to { transform: translateX(0%); }
+}
+
+@keyframes slideRight {
+  from { transform: translateX(0%); }
+  to { transform: translateX(140%); }
+}
