@@ -11,6 +11,64 @@ import {
 } from "../../helpers/queryHelper";
 import { validateAndPrepareProduct } from "../../services/product.service";
 import { isValidObjectId } from "mongoose";
+import axios from "axios";
+const FormData = require("form-data") as typeof import("form-data");
+
+type MulterFiles = { [fieldname: string]: Express.Multer.File[] };
+
+// Upload một hoặc nhiều file lên Cloudinary qua share_services
+const uploadFilesToCloud = async (files: Express.Multer.File[]): Promise<{ url: string; public_id: string }[]> => {
+  if (!files || files.length === 0) return [];
+  const formData = new FormData();
+  files.forEach(file => {
+    formData.append("files", file.buffer, {
+      filename: file.originalname,
+      contentType: file.mimetype,
+    });
+  });
+  const uploadRes = await axios.post(`${process.env.CLOUDINARY_URL}/upload-multiple`, formData, {
+    headers: formData.getHeaders(),
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
+    timeout: 180000, // 3 phút
+  });
+  return uploadRes.data.data as { url: string; public_id: string }[];
+};
+
+// Xóa ảnh trên Cloudinary qua share_services
+const deleteFromCloud = async (publicIds: string[]): Promise<void> => {
+  if (!publicIds || publicIds.length === 0) return;
+  try {
+    await axios.post(`${process.env.CLOUDINARY_URL}/delete-images`, { public_ids: publicIds });
+  } catch {
+    // Xóa ảnh thất bại không chặn luồng chính
+  }
+};
+
+// Parse các field gửi qua FormData (tất cả đều là string) về đúng kiểu
+const parseFormDataBody = (body: Record<string, unknown>): Record<string, unknown> => {
+  const parsed = { ...body };
+
+  // Parse JSON strings
+  if (typeof parsed.sizeStock === "string") {
+    try { parsed.sizeStock = JSON.parse(parsed.sizeStock); } catch { /* giữ nguyên */ }
+  }
+  if (typeof parsed.specs === "string") {
+    try { parsed.specs = JSON.parse(parsed.specs); } catch { /* giữ nguyên */ }
+  }
+
+  // Parse số
+  if (parsed.price !== undefined) parsed.price = Number(parsed.price);
+  if (parsed.originalPrice !== undefined) parsed.originalPrice = parsed.originalPrice === "" ? undefined : Number(parsed.originalPrice);
+  if (parsed.cost !== undefined) parsed.cost = parsed.cost === "" ? undefined : Number(parsed.cost);
+
+  // Parse boolean
+  if (parsed.isFeatured !== undefined) parsed.isFeatured = parsed.isFeatured === "true" || parsed.isFeatured === true;
+  if (parsed.isNewArrival !== undefined) parsed.isNewArrival = parsed.isNewArrival === "true" || parsed.isNewArrival === true;
+  if (parsed.isBestSeller !== undefined) parsed.isBestSeller = parsed.isBestSeller === "true" || parsed.isBestSeller === true;
+
+  return parsed;
+};
 
 // Interface mở rộng cho Product query
 interface ProductQueryParams extends PaginationQuery {
@@ -129,7 +187,28 @@ export const show = TryCatch(async (req: AuthRequest, res: Response, next: NextF
 
 //Thêm mới một sản phẩm [Admin]
 export const create = TryCatch(async (req: AuthRequest, res: Response, next: NextFunction) => {
-  const result = await validateAndPrepareProduct(req.body);
+  const files = (req.files as MulterFiles) || {};
+  const thumbnailFiles = files["thumbnail"] || [];
+  const imageFiles = files["images"] || [];
+
+  // Upload tuần tự: thumbnail trước, images sau
+  const thumbnailUploaded = await uploadFilesToCloud(thumbnailFiles);
+  const imagesUploaded = await uploadFilesToCloud(imageFiles);
+
+  // Gắn kết quả upload vào body, parse các field từ FormData
+  const bodyData = parseFormDataBody({ ...req.body });
+  if (thumbnailUploaded.length > 0) {
+    bodyData.thumbnail = thumbnailUploaded[0];
+  }
+  if (imagesUploaded.length > 0) {
+    const keepImages = bodyData.keepImages ? JSON.parse(bodyData.keepImages as string) : [];
+    bodyData.images = [...keepImages, ...imagesUploaded];
+  } else if (bodyData.keepImages) {
+    bodyData.images = JSON.parse(bodyData.keepImages as string);
+  }
+  delete bodyData.keepImages;
+
+  const result = await validateAndPrepareProduct(bodyData);
 
   if (!result.isValid) {
     return res.status(400).json({
@@ -160,7 +239,45 @@ export const update = TryCatch(async (req: AuthRequest, res: Response, next: Nex
     });
   }
 
-  // Validate và prepare data (bao gồm auto-gen SEO nếu cần)
+  const files = (req.files as MulterFiles) || {};
+  const thumbnailFiles = files["thumbnail"] || [];
+  const imageFiles = files["images"] || [];
+
+  // Upload tuần tự: thumbnail trước, images sau
+  const thumbnailUploaded = await uploadFilesToCloud(thumbnailFiles);
+  const imagesUploaded = await uploadFilesToCloud(imageFiles);
+
+  // Parse các field từ FormData (đều là string khi gửi qua multipart)
+  const bodyData = parseFormDataBody({ ...req.body });
+
+  // Xử lý thumbnail
+  if (thumbnailUploaded.length > 0) {
+    // Có ảnh mới → xóa ảnh cũ trên Cloudinary
+    if (existingProduct.thumbnail?.public_id) {
+      await deleteFromCloud([existingProduct.thumbnail.public_id]);
+    }
+    bodyData.thumbnail = thumbnailUploaded[0];
+  } else if (bodyData.keepThumbnail) {
+    bodyData.thumbnail = JSON.parse(bodyData.keepThumbnail as string);
+  }
+  delete bodyData.keepThumbnail;
+
+  // Xử lý gallery images
+  const keepImages = bodyData.keepImages ? JSON.parse(bodyData.keepImages as string) : null;
+  if (imagesUploaded.length > 0 || keepImages !== null) {
+    const existing = keepImages || [];
+    bodyData.images = [...existing, ...imagesUploaded];
+  }
+  delete bodyData.keepImages;
+
+  // Xóa các ảnh cũ bị loại bỏ (front-end gửi deletedIds)
+  if (bodyData.deletedIds) {
+    const deletedIds: string[] = JSON.parse(bodyData.deletedIds as string);
+    await deleteFromCloud(deletedIds);
+    delete bodyData.deletedIds;
+  }
+
+  // Validate và prepare data
   const existingData = {
     name: existingProduct.name,
     description: existingProduct.description,
@@ -173,7 +290,7 @@ export const update = TryCatch(async (req: AuthRequest, res: Response, next: Nex
     sizeStock: existingProduct.sizeStock
   };
   
-  const result = await validateAndPrepareProduct(req.body, existingData);
+  const result = await validateAndPrepareProduct(bodyData, existingData);
 
   if (!result.isValid) {
     return res.status(400).json({

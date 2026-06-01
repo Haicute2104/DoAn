@@ -13,7 +13,6 @@ import {
 } from "antd";
 import { StarFilled, StarOutlined, SkinOutlined, PlusOutlined, LoadingOutlined } from "@ant-design/icons";
 import { collectionServices } from "../../components/services/collectionServices";
-import { shareServices } from "../../components/services/shareServices";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -92,65 +91,30 @@ function FormCollection({ isModalVisible, setIsModalVisible, editingRecord, onSu
     }
   };
 
-  const uploadFilesToBackend = async (files) => {
-    if (!files || files.length === 0) return [];
-    
-    const formData = new FormData();
-    files.forEach(file => {
-      if (file.originFileObj) {
-        formData.append('files', file.originFileObj);
-      }
-    });
-
-    try {
-      const result = await shareServices.postUploadImage(formData);
-      if (!result.data || !Array.isArray(result.data)) {
-        throw new Error('Invalid response format from upload endpoint');
-      }
-      return result.data;
-    } catch (error) {
-      console.error('Upload error:', error);
-      throw new Error(error.response?.data?.message || error.message || 'Upload failed');
-    }
-  };
-
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
       setLoading(true);
 
-      let imageData = null;
-      let newImageId = null;
-      
-      if (imageFile) {
-        if (isEditing && editingRecord?.imageId) {
-          try {
-            await shareServices.deleteImages([editingRecord.imageId]);
-          } catch (deleteError) {
-            console.log("Lỗi xóa ảnh cũ:", deleteError);
-          }
-        }
-        
-        const uploadResult = await uploadFilesToBackend([imageFile]);
-        imageData = uploadResult[0]?.url;
-        newImageId = uploadResult[0]?.public_id;
-      } else if (isEditing && editingRecord?.image) {
-        imageData = editingRecord.image;
-        newImageId = editingRecord.imageId;
+      const formData = new FormData();
+      formData.append('name', values.name || '');
+      formData.append('description', values.description || '');
+      formData.append('isActive', values.isActive ?? true);
+      formData.append('isFeatured', values.isFeatured ?? false);
+      if (values.productIds) {
+        formData.append('ids', JSON.stringify(values.productIds));
       }
 
-      const data = {
-        ...values,
-        image: imageData,
-        imageId: newImageId,
-        ids: values.productIds,
-      };
+      // Gửi file ảnh nếu có ảnh mới
+      if (imageFile && imageFile.originFileObj) {
+        formData.append('image', imageFile.originFileObj);
+      }
 
       if (isEditing) {
-        await collectionServices.updateCollection(editingRecord._id, data);
+        await collectionServices.updateCollection(editingRecord._id, formData);
         message.success("Cập nhật bộ sưu tập thành công!");
       } else {
-        await collectionServices.createCollection(data);
+        await collectionServices.createCollection(formData);
         message.success("Tạo bộ sưu tập thành công!");
       }
 

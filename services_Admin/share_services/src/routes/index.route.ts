@@ -8,11 +8,10 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Hàm phụ trợ: Upload một file lên Cloudinary
-// Tách hàm này ra để code chính gọn hơn
 const uploadToCloudinary = (fileBuffer: Buffer, folder: string = "products") => {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
-      { folder: folder },
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, timeout: 120000 },
       (error, result) => {
         if (error) return reject(error);
         resolve({
@@ -20,7 +19,8 @@ const uploadToCloudinary = (fileBuffer: Buffer, folder: string = "products") => 
           public_id: result?.public_id,
         });
       }
-    ).end(fileBuffer);
+    );
+    stream.end(fileBuffer);
   });
 };
 
@@ -87,14 +87,12 @@ router.post(
          );
       }
 
-      // 3. Upload song song tất cả ảnh mới
-      // Tạo ra một mảng các Promise upload
-      const uploadPromises = files.map((file) => 
-        uploadToCloudinary(file.buffer)
-      );
-
-      // Chờ tất cả upload xong
-      const results = await Promise.all(uploadPromises);
+      // 3. Upload tuần tự từng ảnh để tránh timeout khi có nhiều file
+      const results = [];
+      for (const file of files) {
+        const result = await uploadToCloudinary(file.buffer);
+        results.push(result);
+      }
 
       res.status(200).json({
         message: "Upload thành công",

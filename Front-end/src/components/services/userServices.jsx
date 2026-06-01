@@ -31,9 +31,11 @@ export const userServices = {
     }
   },
 
-  updateAdminAccount: async (id, data) => {
+  updateAdminAccount: async (id, formData) => {
     try {
-      const response = await api.put(`/admin/user/update/${id}`, data);
+      const response = await api.put(`/admin/user/update/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error) {
       console.log("Lỗi kết nối đến server", error);

@@ -1,6 +1,10 @@
 import {Router} from "express";
 import * as controller from '../../controllers/admin/user.controller';
 import { authMiddleware } from "../../middlewares/auth.middleware";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const multer = require("multer");
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router: Router = Router();
 
@@ -15,7 +19,7 @@ router.patch('/users/unban/:id', controller.unbanUser);
 
 router.get('/:id', controller.show);
 router.post('/create', controller.create);
-router.put('/update/:id', controller.update);
+router.put('/update/:id', upload.single("image"), controller.update);
 router.delete('/delete/:id', controller.destroy);
 
 export const userAdminRoutes: Router = router

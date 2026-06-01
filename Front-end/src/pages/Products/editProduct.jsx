@@ -28,7 +28,6 @@ import {
   ArrowLeftOutlined
 } from '@ant-design/icons';
 import { categoryServices } from '../../components/services/categoryServices';
-import { shareServices } from '../../components/services/shareServices';
 import { productServices } from '../../components/services/productServices';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -146,114 +145,61 @@ function EditProduct() {
   }, [productId, form]);
 
 
-  // --- Helper: Upload files to backend ---
-  const uploadFilesToBackend = async (fileList) => {
-    if (!fileList || fileList.length === 0) return [];
-    
-    const formData = new FormData();
-    fileList.forEach(file => {
-      if (file.originFileObj) {
-        formData.append('files', file.originFileObj);
-      }
-    });
-
-    try {
-      const result = await shareServices.postUploadImage(formData);
-      if (!result.data || !Array.isArray(result.data)) {
-        throw new Error('Invalid response format from upload endpoint');
-      }
-      return result.data;
-    } catch (error) {
-      console.error('Upload error:', error);
-      throw new Error(error.response?.data?.message || error.message || 'Upload failed');
-    }
-  };
-
   // --- Handler: Khi xóa ảnh khỏi list ---
   const handleRemoveImage = (file) => {
-    // Nếu file có public_id (tức là ảnh cũ từ DB), thêm vào danh sách cần xóa
     if (file.public_id) {
-        setDeletedIds(prev => [...prev, file.public_id]);
+      setDeletedIds(prev => [...prev, file.public_id]);
     }
-    // Nếu là ảnh mới up (chưa lưu DB) thì Antd tự xóa khỏi list UI, không cần làm gì thêm
   };
 
-  // --- Xử lý Logic Submit (Tương tự Create nhưng có thêm xóa ảnh trên Cloudinary) ---
+  // --- Xử lý Logic Submit ---
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      // 1. XÓA ẢNH CŨ TRÊN CLOUDINARY (nếu có)
-      if (deletedIds.length > 0) {
-        try {
-          const deleteResult = await shareServices.deleteImages(deletedIds);
-          console.log('Đã xóa ảnh trên Cloudinary:', deleteResult);
-        } catch (deleteError) {
-          console.error('Lỗi xóa ảnh trên Cloudinary:', deleteError);
-          // Có thể hiện warning nhưng vẫn tiếp tục update sản phẩm
-          message.warning('Một số ảnh cũ không thể xóa khỏi Cloudinary, nhưng sản phẩm vẫn được cập nhật.');
-        }
-      }
+      const formData = new FormData();
 
-      // 2. Xử lý Upload Thumbnail
-      let thumbnailData = null;
+      // Append các trường text
+      const textFields = ['name', 'category', 'gender', 'shortDescription', 'description', 'price', 'originalPrice', 'cost', 'status', 'isFeatured', 'isNewArrival', 'isBestSeller'];
+      textFields.forEach(field => {
+        if (values[field] !== undefined && values[field] !== null) {
+          formData.append(field, values[field]);
+        }
+      });
+
+      // sizeStock và specs gửi dạng JSON string
+      if (values.sizeStock) formData.append('sizeStock', JSON.stringify(values.sizeStock));
+      if (values.specs) formData.append('specs', JSON.stringify(values.specs));
+
+      // Thumbnail: nếu là file mới thì gửi file, nếu giữ nguyên thì gửi keepThumbnail
       if (values.thumbnail && values.thumbnail.length > 0) {
         const thumbFile = values.thumbnail[0];
-        
         if (thumbFile.originFileObj) {
-           // Case: Upload mới
-           const uploadResult = await uploadFilesToBackend([thumbFile]);
-           if (uploadResult && uploadResult.length > 0) {
-             thumbnailData = {
-               url: uploadResult[0].url,
-               public_id: uploadResult[0].public_id
-             };
-           }
+          formData.append('thumbnail', thumbFile.originFileObj);
         } else {
-           // Case: Giữ nguyên ảnh cũ
-           thumbnailData = {
-             url: thumbFile.url,
-             public_id: thumbFile.public_id || ''
-           };
+          formData.append('keepThumbnail', JSON.stringify({ url: thumbFile.url, public_id: thumbFile.public_id || '' }));
         }
       }
 
-      // 3. Xử lý Upload Images
-      let listImages = [];
+      // Images: gửi file mới + danh sách ảnh cũ giữ lại
+      const keepImages = [];
       if (values.images && values.images.length > 0) {
-        // Lọc file mới
-        const filesToUpload = values.images.filter(f => f.originFileObj);
-        // Lọc file cũ
-        const existingImages = values.images
-          .filter(f => !f.originFileObj)
-          .map(f => ({
-            url: f.url,
-            public_id: f.public_id || ''
-          }));
-        
-        if (filesToUpload.length > 0) {
-          const uploadResults = await uploadFilesToBackend(filesToUpload);
-          const newImages = uploadResults.map(item => ({
-            url: item.url,
-            public_id: item.public_id
-          }));
-          listImages = [...existingImages, ...newImages];
-        } else {
-          listImages = existingImages;
-        }
+        values.images.forEach(f => {
+          if (f.originFileObj) {
+            formData.append('images', f.originFileObj);
+          } else {
+            keepImages.push({ url: f.url, public_id: f.public_id || '' });
+          }
+        });
+      }
+      formData.append('keepImages', JSON.stringify(keepImages));
+
+      // Gửi danh sách ảnh cũ cần xóa trên Cloudinary
+      if (deletedIds.length > 0) {
+        formData.append('deletedIds', JSON.stringify(deletedIds));
       }
 
-      // 4. Tạo payload (Không cần gửi deleted_public_ids vì đã xóa trực tiếp)
-      const finalPayload = {
-        ...values,
-        thumbnail: thumbnailData,
-        images: listImages
-      };
-
-      // 5. Gọi API Update
-      const result = await productServices.updateProduct(productId, finalPayload);
+      const result = await productServices.updateProduct(productId, formData);
       message.success(result.message || 'Cập nhật sản phẩm thành công!');
-      
-      // Reset danh sách xóa sau khi thành công
       setDeletedIds([]);
 
     } catch (error) {

@@ -50,9 +50,11 @@ export const productServices = {
     }  
   },
 
-  createProduct: async (productData) => {
+  createProduct: async (formData) => {
     try {
-      const response = await api.post('/admin/products/create', productData);
+      const response = await api.post('/admin/products/create', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error) {
       console.log("Lỗi kết nối đến server", error);
@@ -70,9 +72,11 @@ export const productServices = {
     }
   },
 
-  updateProduct: async (id, productData) => {
+  updateProduct: async (id, formData) => {
     try {
-      const response = await api.put(`/admin/products/${id}`, productData);
+      const response = await api.put(`/admin/products/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error) {
       console.log("Lỗi kết nối đến server", error);

@@ -28,7 +28,6 @@ import {
   ArrowLeftOutlined
 } from '@ant-design/icons';
 import { categoryServices } from '../../components/services/categoryServices';
-import { shareServices } from '../../components/services/shareServices';
 import { productServices } from '../../components/services/productServices';
 import { useNavigate } from 'react-router-dom';
 
@@ -75,97 +74,41 @@ function CreateProduct() {
     fetchApi();
   }, []);
 
-  // --- Helper: Upload files to backend ---
-  const uploadFilesToBackend = async (fileList) => {
-    if (!fileList || fileList.length === 0) return [];
-    
-    const formData = new FormData();
-    fileList.forEach(file => {
-      // Antd lưu file thực tế trong property originFileObj
-      if (file.originFileObj) {
-        formData.append('files', file.originFileObj);
-      }
-    });
-
-    try {
-      // Upload ảnh lên services xong trả về URL
-      const result = await shareServices.postUploadImage(formData);
-
-      if (!result.data || !Array.isArray(result.data)) {
-        throw new Error('Invalid response format from upload endpoint');
-      }
-      
-      return result.data;
-    } catch (error) {
-      console.error('Upload error:', error);
-      throw new Error(error.response?.data?.message || error.message || 'Upload failed');
-    }
-  };
-
   // --- Xử lý Logic ---
-const onFinish = async (values) => {
+  const onFinish = async (values) => {
     setLoading(true);
     try {
-      // 1. Xử lý Upload Thumbnail
-      let thumbnailData = null;
-      
-      // Nếu có file trong thumbnail (mảng từ Upload component)
-      if (values.thumbnail && values.thumbnail.length > 0) {
-        const thumbFile = values.thumbnail[0];
-        // Nếu file có originFileObj nghĩa là file mới chọn từ máy -> Cần upload
-        if (thumbFile.originFileObj) {
-           const uploadResult = await uploadFilesToBackend([thumbFile]);
-           if (uploadResult && uploadResult.length > 0) {
-             thumbnailData = {
-               url: uploadResult[0].url,
-               public_id: uploadResult[0].public_id
-             };
-           }
-        } else {
-           // Nếu không có originFileObj, có thể là ảnh cũ (khi edit)
-           thumbnailData = {
-             url: thumbFile.url,
-             public_id: thumbFile.public_id || ''
-           };
+      const formData = new FormData();
+
+      // Append các trường text
+      const textFields = ['name', 'category', 'gender', 'shortDescription', 'description', 'price', 'originalPrice', 'cost', 'status', 'isFeatured', 'isNewArrival', 'isBestSeller'];
+      textFields.forEach(field => {
+        if (values[field] !== undefined && values[field] !== null) {
+          formData.append(field, values[field]);
         }
+      });
+
+      // sizeStock và specs gửi dạng JSON string
+      if (values.sizeStock) formData.append('sizeStock', JSON.stringify(values.sizeStock));
+      if (values.specs) formData.append('specs', JSON.stringify(values.specs));
+
+      // Thumbnail file
+      if (values.thumbnail && values.thumbnail.length > 0 && values.thumbnail[0].originFileObj) {
+        formData.append('thumbnail', values.thumbnail[0].originFileObj);
       }
 
-      // 2. Xử lý Upload Images (Ảnh chi tiết)
-      let listImages = [];
+      // Images files
       if (values.images && values.images.length > 0) {
-        // Lọc ra các file mới cần upload
-        const filesToUpload = values.images.filter(f => f.originFileObj);
-        // Các file cũ (đã có url và public_id)
-        const existingImages = values.images
-          .filter(f => !f.originFileObj)
-          .map(f => ({
-            url: f.url,
-            public_id: f.public_id || ''
-          }));
-        
-        if (filesToUpload.length > 0) {
-          const uploadResults = await uploadFilesToBackend(filesToUpload);
-          const newImages = uploadResults.map(item => ({
-            url: item.url,
-            public_id: item.public_id
-          }));
-          listImages = [...existingImages, ...newImages];
-        } else {
-          listImages = existingImages;
-        }
+        values.images.forEach(f => {
+          if (f.originFileObj) {
+            formData.append('images', f.originFileObj);
+          }
+        });
       }
 
-      // 3. Tạo payload cuối cùng để lưu vào DB
-      const finalPayload = {
-        ...values,
-        thumbnail: thumbnailData, // Object { url, public_id }
-        images: listImages,       // Array of { url, public_id }
-      };
-
-      // 4. Gọi API tạo sản phẩm mới
-      const result = await productServices.createProduct(finalPayload);      
+      const result = await productServices.createProduct(formData);
       message.success(result.message || 'Tạo sản phẩm thành công!');
-      form.resetFields(); 
+      form.resetFields();
 
     } catch (error) {
       console.error("Submit Error:", error);

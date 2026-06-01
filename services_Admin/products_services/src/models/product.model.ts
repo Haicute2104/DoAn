@@ -28,9 +28,6 @@ export interface IProduct extends Omit<Document, 'collection'> {
   shortDescription?: string; // Plain text hoặc HTML ngắn
   category: Types.ObjectId;
   collection?: Types.ObjectId;
-
-
-
   // Hình ảnh
   images: [
     {

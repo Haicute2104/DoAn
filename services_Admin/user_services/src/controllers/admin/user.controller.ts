@@ -4,6 +4,16 @@ import { AuthRequest } from "../../middlewares/auth.middleware";
 import { Response, NextFunction } from "express";
 import bcrypt from 'bcrypt';
 import axios from "axios";
+const FormData = require("form-data") as typeof import("form-data");
+
+type MulterFile = {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+};
 
 // Các role được phép quản lý trong admin panel
 const ADMIN_ROLES = ['admin', 'staff'];
@@ -123,13 +133,11 @@ export const update = TryCatch(async (req: AuthRequest, res: Response, next: Nex
     });
   }
 
-  const { fullName, email, password, phone, avatarUrl, avatarPublicId, dateOfBirth, gender } = req.body as {
+  const { fullName, email, password, phone, dateOfBirth, gender } = req.body as {
     fullName: string;
     email: string;
     password: string;
     phone: string;
-    avatarUrl: string;
-    avatarPublicId: string;
     dateOfBirth: string;
     gender: string;
   };
@@ -150,11 +158,36 @@ export const update = TryCatch(async (req: AuthRequest, res: Response, next: Nex
     userUpdate.password = await bcrypt.hash(password, 10);
   }
   if (phone !== undefined) userUpdate.phone = phone;
-  if (avatarUrl !== undefined) userUpdate.avatarUrl = avatarUrl;
-  if (avatarPublicId !== undefined) userUpdate.avatarPublicId = avatarPublicId;
   if (dateOfBirth !== undefined) userUpdate.dateOfBirth = dateOfBirth;
   if (gender !== undefined) userUpdate.gender = gender;
-  // Không cho phép thay đổi role
+
+  // Xử lý upload ảnh đại diện nếu có file
+  const file = (req as AuthRequest & { file?: MulterFile }).file;
+  if (file) {
+    const formData = new FormData();
+    formData.append("files", file.buffer, {
+      filename: file.originalname,
+      contentType: file.mimetype,
+    });
+    const uploadRes = await axios.post(`${process.env.CLOUDINARY_URL}/upload-multiple`, formData, {
+      headers: formData.getHeaders(),
+    });
+    const uploaded = uploadRes.data.data[0] as { url: string; public_id: string };
+
+    // Xóa ảnh cũ nếu có
+    if (userUpdate.avatarPublicId) {
+      try {
+        await axios.post(`${process.env.CLOUDINARY_URL}/delete-images`, {
+          public_ids: [userUpdate.avatarPublicId],
+        });
+      } catch {
+        // Không chặn luồng chính
+      }
+    }
+
+    userUpdate.avatarUrl = uploaded.url;
+    userUpdate.avatarPublicId = uploaded.public_id;
+  }
 
   await userUpdate.save();
 

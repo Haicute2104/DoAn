@@ -11,9 +11,11 @@ export const collectionServices = {
     }
   },
 
-  createCollection: async (data) => {
+  createCollection: async (formData) => {
     try {
-      const response = await api.post('/admin/collection/create', data);
+      const response = await api.post('/admin/collection/create', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error) {
       console.log("Lỗi khi tạo bộ sưu tập", error);
@@ -21,9 +23,11 @@ export const collectionServices = {
     }
   },
 
-  updateCollection: async (id, data) => {
+  updateCollection: async (id, formData) => {
     try {
-      const response = await api.put(`/admin/collection/${id}`, data);
+      const response = await api.put(`/admin/collection/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error) {
       console.log("Lỗi khi cập nhật bộ sưu tập", error);

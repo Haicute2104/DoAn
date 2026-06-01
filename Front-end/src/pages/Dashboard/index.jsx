@@ -36,18 +36,17 @@ function Dashboard() {
   const handleChangeInfo = async (values) => {
     try {
       setLoadingButton(true);
-      console.log("Form values:", values);
       const formData = new FormData();
       formData.append('fullName', values.fullName);
       formData.append('email', values.email);
       if (values.phone) {
         formData.append('phone', values.phone);
       }
-      if (fileList.length > 0) {
+      if (fileList.length > 0 && fileList[0].originFileObj) {
         formData.append('image', fileList[0].originFileObj);
       }
 
-      await userServices.updateUser(userId, formData);
+      await userServices.updateAdminAccount(userId, formData);
       // Refresh user data
       const response = await userServices.getUserById(userId);
       setUser(response.user);

@@ -41,7 +41,6 @@ const CollectionSchema = new Schema<ICollection>(
       default: true,
       index: true,
     },
-    
     isFeatured: {
       type: Boolean,
       default: false,

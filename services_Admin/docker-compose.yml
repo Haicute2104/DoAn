@@ -162,6 +162,7 @@ services:
       - MONGO_URL=${MONGO_URL_PRODUCTS}
       - REDIS_URL=${REDIS_URL}
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - CLOUDINARY_URL=http://share:5001/api/v1
     networks:
       - admin-network
     depends_on:
