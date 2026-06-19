@@ -310,6 +310,19 @@ export default function ProductDetailContent({ product }: Props) {
                   ? "ĐANG THÊM..."
                   : "THÊM VÀO GIỎ HÀNG"}
             </button>
+
+            <button
+              onClick={() => {
+                const params = new URLSearchParams({
+                  cloth_url: product.thumbnail?.url || "",
+                  product_name: product.name,
+                });
+                window.open(`/try-on?${params.toString()}`, "_blank");
+              }}
+              className="w-full py-4 font-bold uppercase tracking-widest transition-colors border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white"
+            >
+              THỬ ĐỒ VỚI AI
+            </button>
           </div>
         </div>
       </div>

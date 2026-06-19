@@ -205,7 +205,7 @@ const Categories = () => {
             dataSource={filteredData} 
             rowKey="_id"
             loading={loading}
-            pagination={{ pageSize: 5 }}
+            pagination={{ pageSize: 10 }}
             bordered
             scroll={{ x: 700 }}
           />

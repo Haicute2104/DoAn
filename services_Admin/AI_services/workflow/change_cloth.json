@@ -1,0 +1,653 @@
+{
+  "83": {
+    "inputs": {
+      "image": "20221223_LYKGY4yTRM6ca460Z5OMh3cE.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "727": {
+    "inputs": {
+      "image": "sg-11134201-7rdwy-m13xwusphif4c0.avif"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "728": {
+    "inputs": {
+      "images": [
+        "84:65",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "726:702": {
+    "inputs": {
+      "samples": [
+        "726:713",
+        0
+      ],
+      "vae": [
+        "726:706",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "726:703": {
+    "inputs": {
+      "unet_name": "flux-2-klein-9b-kv-fp8.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "726:704": {
+    "inputs": {
+      "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+      "type": "flux2",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "726:705": {
+    "inputs": {
+      "text": "Change that person's clothing to a strapless top and small underwear.",
+      "clip": [
+        "726:704",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "726:706": {
+    "inputs": {
+      "vae_name": "flux2-vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "726:707": {
+    "inputs": {
+      "noise_seed": 210237924512900
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "726:708": {
+    "inputs": {
+      "model": [
+        "726:703",
+        0
+      ]
+    },
+    "class_type": "FluxKVCache",
+    "_meta": {
+      "title": "Flux KV Cache"
+    }
+  },
+  "726:709": {
+    "inputs": {
+      "cfg": 1,
+      "model": [
+        "726:708",
+        0
+      ],
+      "positive": [
+        "726:716:722",
+        0
+      ],
+      "negative": [
+        "726:716:720",
+        0
+      ]
+    },
+    "class_type": "CFGGuider",
+    "_meta": {
+      "title": "CFGGuider"
+    }
+  },
+  "726:710": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "726:711": {
+    "inputs": {
+      "width": [
+        "726:718",
+        0
+      ],
+      "height": [
+        "726:718",
+        1
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyFlux2LatentImage",
+    "_meta": {
+      "title": "Empty Flux 2 Latent"
+    }
+  },
+  "726:712": {
+    "inputs": {
+      "steps": 4,
+      "width": [
+        "726:718",
+        0
+      ],
+      "height": [
+        "726:718",
+        1
+      ]
+    },
+    "class_type": "Flux2Scheduler",
+    "_meta": {
+      "title": "Flux2Scheduler"
+    }
+  },
+  "726:713": {
+    "inputs": {
+      "noise": [
+        "726:707",
+        0
+      ],
+      "guider": [
+        "726:709",
+        0
+      ],
+      "sampler": [
+        "726:710",
+        0
+      ],
+      "sigmas": [
+        "726:712",
+        0
+      ],
+      "latent_image": [
+        "726:711",
+        0
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "726:714": {
+    "inputs": {
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1,
+      "image": [
+        "83",
+        0
+      ]
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "Scale Image to Total Pixels"
+    }
+  },
+  "726:716:720": {
+    "inputs": {
+      "conditioning": [
+        "726:719",
+        0
+      ],
+      "latent": [
+        "726:716:721",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "726:716:721": {
+    "inputs": {
+      "pixels": [
+        "726:714",
+        0
+      ],
+      "vae": [
+        "726:706",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "726:716:722": {
+    "inputs": {
+      "conditioning": [
+        "726:705",
+        0
+      ],
+      "latent": [
+        "726:716:721",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "726:718": {
+    "inputs": {
+      "image": [
+        "726:714",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "Get Image Size"
+    }
+  },
+  "726:719": {
+    "inputs": {
+      "conditioning": [
+        "726:705",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "84:65": {
+    "inputs": {
+      "samples": [
+        "84:91",
+        0
+      ],
+      "vae": [
+        "84:72",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "84:70": {
+    "inputs": {
+      "unet_name": "flux-2-klein-9b-kv-fp8.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "84:71": {
+    "inputs": {
+      "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+      "type": "flux2",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "84:74": {
+    "inputs": {
+      "text": "make the person from picture 1 wearing the entire outfit from picture 2.",
+      "clip": [
+        "84:71",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "84:72": {
+    "inputs": {
+      "vae_name": "flux2-vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "84:85": {
+    "inputs": {
+      "noise_seed": 418017119771655
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "84:86": {
+    "inputs": {
+      "model": [
+        "84:70",
+        0
+      ]
+    },
+    "class_type": "FluxKVCache",
+    "_meta": {
+      "title": "Flux KV Cache"
+    }
+  },
+  "84:87": {
+    "inputs": {
+      "cfg": 1,
+      "model": [
+        "84:86",
+        0
+      ],
+      "positive": [
+        "84:699:121",
+        0
+      ],
+      "negative": [
+        "84:699:119",
+        0
+      ]
+    },
+    "class_type": "CFGGuider",
+    "_meta": {
+      "title": "CFGGuider"
+    }
+  },
+  "84:88": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "84:89": {
+    "inputs": {
+      "width": [
+        "84:700",
+        0
+      ],
+      "height": [
+        "84:700",
+        1
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyFlux2LatentImage",
+    "_meta": {
+      "title": "Empty Flux 2 Latent"
+    }
+  },
+  "84:90": {
+    "inputs": {
+      "steps": 6,
+      "width": [
+        "84:700",
+        0
+      ],
+      "height": [
+        "84:700",
+        1
+      ]
+    },
+    "class_type": "Flux2Scheduler",
+    "_meta": {
+      "title": "Flux2Scheduler"
+    }
+  },
+  "84:91": {
+    "inputs": {
+      "noise": [
+        "84:85",
+        0
+      ],
+      "guider": [
+        "84:87",
+        0
+      ],
+      "sampler": [
+        "84:88",
+        0
+      ],
+      "sigmas": [
+        "84:90",
+        0
+      ],
+      "latent_image": [
+        "84:89",
+        0
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "84:696": {
+    "inputs": {
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1,
+      "image": [
+        "726:702",
+        0
+      ]
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "Scale Image to Total Pixels"
+    }
+  },
+  "84:697": {
+    "inputs": {
+      "upscale_method": "lanczos",
+      "megapixels": 1,
+      "resolution_steps": 1,
+      "image": [
+        "84:732",
+        0
+      ]
+    },
+    "class_type": "ImageScaleToTotalPixels",
+    "_meta": {
+      "title": "Scale Image to Total Pixels"
+    }
+  },
+  "84:698:116": {
+    "inputs": {
+      "conditioning": [
+        "84:701",
+        0
+      ],
+      "latent": [
+        "84:698:117",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "84:698:117": {
+    "inputs": {
+      "pixels": [
+        "84:696",
+        0
+      ],
+      "vae": [
+        "84:72",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "84:698:118": {
+    "inputs": {
+      "conditioning": [
+        "84:74",
+        0
+      ],
+      "latent": [
+        "84:698:117",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "84:699:119": {
+    "inputs": {
+      "conditioning": [
+        "84:698:116",
+        0
+      ],
+      "latent": [
+        "84:699:120",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "84:699:120": {
+    "inputs": {
+      "pixels": [
+        "84:697",
+        0
+      ],
+      "vae": [
+        "84:72",
+        0
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "84:699:121": {
+    "inputs": {
+      "conditioning": [
+        "84:698:118",
+        0
+      ],
+      "latent": [
+        "84:699:120",
+        0
+      ]
+    },
+    "class_type": "ReferenceLatent",
+    "_meta": {
+      "title": "ReferenceLatent"
+    }
+  },
+  "84:700": {
+    "inputs": {
+      "image": [
+        "84:696",
+        0
+      ]
+    },
+    "class_type": "GetImageSize",
+    "_meta": {
+      "title": "Get Image Size"
+    }
+  },
+  "84:701": {
+    "inputs": {
+      "conditioning": [
+        "84:74",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "84:730": {
+    "inputs": {
+      "model_name": "sam_vit_h (2.56GB)"
+    },
+    "class_type": "SAMModelLoader (segment anything)",
+    "_meta": {
+      "title": "SAMModelLoader (segment anything)"
+    }
+  },
+  "84:731": {
+    "inputs": {
+      "model_name": "GroundingDINO_SwinB (938MB)"
+    },
+    "class_type": "GroundingDinoModelLoader (segment anything)",
+    "_meta": {
+      "title": "GroundingDinoModelLoader (segment anything)"
+    }
+  },
+  "84:732": {
+    "inputs": {
+      "prompt": "clothes",
+      "threshold": 0.3,
+      "sam_model": [
+        "84:730",
+        0
+      ],
+      "grounding_dino_model": [
+        "84:731",
+        0
+      ],
+      "image": [
+        "727",
+        0
+      ]
+    },
+    "class_type": "GroundingDinoSAMSegment (segment anything)",
+    "_meta": {
+      "title": "GroundingDinoSAMSegment (segment anything)"
+    }
+  }
+}

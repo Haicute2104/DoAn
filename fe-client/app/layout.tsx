@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
 import { AlertProvider } from "@/components/providers/AlertProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
-import LoginModal from "@/components/UI/LoginModal";
-import ChatWidget from "@/components/UI/ChatWidget";
+import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
 
 const playfair = Playfair_Display({
@@ -35,13 +32,9 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${jakarta.variable}`}
       >
-        <AuthProvider >
+        <AuthProvider>
           <AlertProvider>
-            <Header />
-            {children}
-            <Footer />
-            <LoginModal />
-            <ChatWidget />
+            <LayoutWrapper>{children}</LayoutWrapper>
           </AlertProvider>
         </AuthProvider>
       </body>
