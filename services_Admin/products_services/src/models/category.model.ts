@@ -6,6 +6,7 @@ export interface ICategory extends Document {
   slug: string;
   description?: string;
   image?: string;
+  imageId?: string;
   icon?: string;
   isActive: boolean;
   productCount: number;
@@ -29,6 +30,9 @@ const CategorySchema = new Schema<ICategory>({
     type: String,
   },
   image: {
+    type: String,
+  },
+  imageId: {
     type: String,
   },
   icon: {

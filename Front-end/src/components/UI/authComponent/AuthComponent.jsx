@@ -128,6 +128,7 @@ const AuthComponent = ({ initialView = 'login' }) => {
               onRegisterClick={handleAnimationLogin}
             />
             <div className="slogan-section">
+
               <h3>Chào mừng bạn</h3>
               <p>Hệ thống quản lý áo dài</p>
             </div>
@@ -139,6 +140,7 @@ const AuthComponent = ({ initialView = 'login' }) => {
         {currentView === 'register' && (
           <>
             <div className="slogan-section right-section">
+
               <h3>Chào mừng bạn</h3>
               <p>Hệ thống quản lý áo dài</p>
             </div>
@@ -156,6 +158,7 @@ const AuthComponent = ({ initialView = 'login' }) => {
         {currentView === 'forgot' && (
           <>
             <div className="slogan-section right-section">
+
               <h3>Chào mừng bạn</h3>
               <p>Hệ thống quản lý áo dài</p>
             </div>

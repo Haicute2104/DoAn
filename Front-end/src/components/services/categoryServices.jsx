@@ -11,9 +11,11 @@ export const categoryServices = {
     }
   },
 
-  createCategory: async (data) => {
+  createCategory: async (formData) => {
     try {
-      const response = await api.post('/admin/categories/create', data);
+      const response = await api.post('/admin/categories/create', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error) {
       console.log("Lỗi kết nối đến server", error);
@@ -21,9 +23,11 @@ export const categoryServices = {
     }
   },
 
-  updateCategory: async (id, data) => {
+  updateCategory: async (id, formData) => {
     try {
-      const response = await api.put(`/admin/categories/${id}`, data);
+      const response = await api.put(`/admin/categories/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error) {
       console.log("Lỗi kết nối đến server", error);

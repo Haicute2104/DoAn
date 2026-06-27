@@ -37,6 +37,13 @@ import {
 import { getListAddress } from "@/components/services/user.services";
 import { IOrder } from "@/types/order.type";
 import { IAddress } from "@/types/user.type";
+import {
+  getFirstError,
+  sanitizePhoneInput,
+  validateAddressForm,
+  validateEmail,
+  validateNote,
+} from "@/lib/validation";
 
 function formatCurrency(value: number) {
   return value.toLocaleString("vi-VN") + " VNĐ";
@@ -53,6 +60,7 @@ export default function CheckoutPage() {
   const [cartLoading, setCartLoading] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [formFullName, setFormFullName] = useState("");
   const [formPhone, setFormPhone] = useState("");
@@ -86,7 +94,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (user) {
       setFormFullName(user.fullName ?? "");
-      setFormPhone(user.phone ?? "");
+      setFormPhone(sanitizePhoneInput(user.phone ?? ""));
       setFormEmail(user.email ?? "");
     }
   }, [user]);
@@ -240,15 +248,25 @@ export default function CheckoutPage() {
       return;
     }
 
-    if (!formFullName.trim() || !formPhone.trim()) {
-      showAlert("error", "Vui lòng nhập đầy đủ họ tên và số điện thoại");
+    const errors = validateAddressForm({
+      fullName: formFullName,
+      phone: formPhone,
+      address,
+    });
+
+    const emailResult = validateEmail(formEmail, { required: false });
+    if (!emailResult.valid) errors.email = emailResult.message;
+
+    const noteResult = validateNote(formNote);
+    if (!noteResult.valid) errors.note = noteResult.message;
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      showAlert("error", getFirstError(errors) ?? "Vui lòng kiểm tra lại thông tin");
       return;
     }
 
-    if (!address.province || !address.ward || !address.street) {
-      showAlert("error", "Vui lòng chọn đầy đủ địa chỉ giao hàng");
-      return;
-    }
+    setFieldErrors({});
 
     if (!reservationId) {
       showAlert("error", "Phiên giữ chỗ đã hết hạn. Vui lòng quay lại giỏ hàng.");
@@ -257,9 +275,9 @@ export default function CheckoutPage() {
     }
 
     const formData = {
-      fullName: formFullName,
-      phone: formPhone,
-      email: formEmail,
+      fullName: formFullName.trim(),
+      phone: sanitizePhoneInput(formPhone),
+      email: formEmail.trim(),
       address: {
         province: address.province,
         ward: address.ward,
@@ -486,9 +504,20 @@ export default function CheckoutPage() {
                     id="fullname"
                     placeholder="Nhập họ và tên đầy đủ..."
                     required
+                    maxLength={50}
                     value={formFullName}
-                    onChange={(e) => setFormFullName(e.target.value)}
+                    onChange={(e) => {
+                      setFormFullName(e.target.value);
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.fullName;
+                        return next;
+                      });
+                    }}
                   />
+                  {fieldErrors.fullName && (
+                    <p className="text-xs text-red-500">{fieldErrors.fullName}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -496,11 +525,23 @@ export default function CheckoutPage() {
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="090xxxxxxx"
+                    inputMode="numeric"
+                    placeholder="0xxxxxxxxx"
                     required
+                    maxLength={10}
                     value={formPhone}
-                    onChange={(e) => setFormPhone(e.target.value)}
+                    onChange={(e) => {
+                      setFormPhone(sanitizePhoneInput(e.target.value));
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.phone;
+                        return next;
+                      });
+                    }}
                   />
+                  {fieldErrors.phone && (
+                    <p className="text-xs text-red-500">{fieldErrors.phone}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -509,17 +550,46 @@ export default function CheckoutPage() {
                     id="email"
                     type="email"
                     placeholder="email@example.com"
+                    maxLength={100}
                     value={formEmail}
-                    onChange={(e) => setFormEmail(e.target.value)}
+                    onChange={(e) => {
+                      setFormEmail(e.target.value);
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.email;
+                        return next;
+                      });
+                    }}
                   />
+                  {fieldErrors.email && (
+                    <p className="text-xs text-red-500">{fieldErrors.email}</p>
+                  )}
                 </div>
 
                 <div className="md:col-span-2">
                   <AddressPicker
                     key={selectedAddressId ?? "default"}
-                    onChange={setAddress}
+                    onChange={(value) => {
+                      setAddress(value);
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.province;
+                        delete next.ward;
+                        delete next.street;
+                        return next;
+                      });
+                    }}
                     defaultValue={addressDefault}
                   />
+                  {(fieldErrors.province ||
+                    fieldErrors.ward ||
+                    fieldErrors.street) && (
+                    <p className="mt-2 text-xs text-red-500">
+                      {fieldErrors.province ||
+                        fieldErrors.ward ||
+                        fieldErrors.street}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
@@ -527,11 +597,22 @@ export default function CheckoutPage() {
                   <textarea
                     id="note"
                     rows={3}
+                    maxLength={500}
                     className="flex w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-stone-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-stone-400 font-light resize-none"
                     placeholder="Ví dụ: Giao hàng vào giờ hành chính..."
                     value={formNote}
-                    onChange={(e) => setFormNote(e.target.value)}
+                    onChange={(e) => {
+                      setFormNote(e.target.value);
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.note;
+                        return next;
+                      });
+                    }}
                   />
+                  {fieldErrors.note && (
+                    <p className="text-xs text-red-500">{fieldErrors.note}</p>
+                  )}
                 </div>
               </div>
             </section>

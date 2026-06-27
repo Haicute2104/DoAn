@@ -58,17 +58,26 @@ function LayoutDefault() {
 
         /* Logo góc trên cùng Sider */
         .admin-logo-box {
-          height: 32px;
-          margin: 16px;
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 6px;
+          margin: 16px 12px;
+          padding: 8px;
+          background: #ffffff;
+          border-radius: 8px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: white;
-          font-weight: bold;
           overflow: hidden;
           transition: all 0.3s;
+        }
+
+        .admin-logo-box img {
+          width: 100%;
+          height: auto;
+          max-height: 48px;
+          object-fit: contain;
+        }
+
+        .admin-logo-box.collapsed img {
+          max-height: 32px;
         }
 
         .admin-inner-layout {
@@ -126,9 +135,9 @@ function LayoutDefault() {
           collapsed={collapsed}
           className="admin-sider"
         >
-          {/* Logo Box (Tuỳ chọn) */}
-          <div className="admin-logo-box">
-            {collapsed ? '^-^' : 'Hải cutee'}
+          {/* Logo Box */}
+          <div className={`admin-logo-box${collapsed ? ' collapsed' : ''}`}>
+            <img src="/image/logo.png" alt="Áo Dài Believe" />
           </div>
 
           <Menu
@@ -227,7 +236,7 @@ function LayoutDefault() {
           </Content>
 
           <Footer className="admin-footer">
-            Áo dài ©{new Date().getFullYear()} Created by Hải Cutee(^-^)
+            Áo Dài Believe ©{new Date().getFullYear()}
           </Footer>
         </Layout>
       </Layout>

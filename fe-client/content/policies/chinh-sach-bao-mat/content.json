@@ -1,0 +1,39 @@
+{
+  "title": "Chính sách bảo mật",
+  "slug": "chinh-sach-bao-mat",
+  "description": "Cam kết bảo vệ thông tin cá nhân và dữ liệu khách hàng khi sử dụng website Áo Dài Believe.",
+  "updatedAt": "27/06/2026",
+  "sections": [
+    {
+      "title": "1. Thông tin chúng tôi thu thập",
+      "paragraphs": [
+        "Thông tin cá nhân: họ tên, email, số điện thoại, địa chỉ giao hàng khi bạn đăng ký tài khoản hoặc đặt hàng.",
+        "Thông tin giao dịch: lịch sử đơn hàng, phương thức thanh toán (không lưu trữ thông tin thẻ ngân hàng đầy đủ).",
+        "Thông tin kỹ thuật: địa chỉ IP, loại trình duyệt, cookie phục vụ cải thiện trải nghiệm người dùng."
+      ]
+    },
+    {
+      "title": "2. Mục đích sử dụng thông tin",
+      "paragraphs": [
+        "Xử lý đơn hàng, giao hàng và hỗ trợ khách hàng sau bán hàng.",
+        "Gửi thông báo về trạng thái đơn hàng, chương trình khuyến mãi (khi khách hàng đồng ý nhận).",
+        "Cải thiện chất lượng dịch vụ, phân tích hành vi mua sắm ẩn danh trên website."
+      ]
+    },
+    {
+      "title": "3. Bảo mật và lưu trữ",
+      "paragraphs": [
+        "Áo Dài Believe áp dụng các biện pháp bảo mật kỹ thuật phù hợp để bảo vệ dữ liệu khách hàng khỏi truy cập trái phép.",
+        "Thông tin cá nhân được lưu trữ trong thời gian cần thiết để phục vụ mục đích đã nêu hoặc theo quy định pháp luật."
+      ]
+    },
+    {
+      "title": "4. Quyền của khách hàng",
+      "paragraphs": [
+        "Khách hàng có quyền yêu cầu truy cập, chỉnh sửa hoặc xóa thông tin cá nhân bằng cách liên hệ qua trang Liên hệ.",
+        "Khách hàng có thể từ chối nhận email marketing bất cứ lúc nào thông qua liên kết hủy đăng ký trong email.",
+        "Chúng tôi không bán hoặc chia sẻ thông tin cá nhân cho bên thứ ba vì mục đích thương mại mà không có sự đồng ý của khách hàng."
+      ]
+    }
+  ]
+}

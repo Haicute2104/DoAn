@@ -70,14 +70,14 @@ const Categories = () => {
     setIsModalVisible(true);
   };
 
-  const handleFormSubmit = async (values) => {
+  const handleFormSubmit = async (formData) => {
     setLoading(true);
     try {
       if (isEditing) {
-        const result = await categoryServices.updateCategory(editingCategory._id, values);
+        const result = await categoryServices.updateCategory(editingCategory._id, formData);
         message.success(result.message || 'Cập nhật danh mục thành công!');
       } else {
-        const result = await categoryServices.createCategory(values);
+        const result = await categoryServices.createCategory(formData);
         message.success(result.message || 'Thêm danh mục mới thành công!');
       }
       setIsModalVisible(false);
@@ -94,6 +94,24 @@ const Categories = () => {
 
 
   const columns = [
+    {
+      title: 'Ảnh',
+      dataIndex: 'image',
+      key: 'image',
+      width: 80,
+      align: 'center',
+      render: (image, record) => (
+        image ? (
+          <img
+            src={image}
+            alt={record.name}
+            style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 4 }}
+          />
+        ) : (
+          <Text type="secondary">—</Text>
+        )
+      ),
+    },
     {
       title: 'Tên danh mục',
       dataIndex: 'name',

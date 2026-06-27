@@ -1,0 +1,36 @@
+{
+  "title": "Chính sách mua hàng",
+  "slug": "chinh-sach-mua-hang",
+  "description": "Quy định về quy trình đặt hàng, thanh toán và xác nhận đơn hàng tại Áo Dài Believe.",
+  "updatedAt": "27/06/2026",
+  "sections": [
+    {
+      "title": "1. Quy trình đặt hàng",
+      "paragraphs": [
+        "Khách hàng có thể đặt hàng trực tuyến qua website chính thức của Áo Dài Believe bằng cách chọn sản phẩm, thêm vào giỏ hàng và hoàn tất thông tin giao hàng.",
+        "Sau khi đặt hàng thành công, hệ thống sẽ gửi email xác nhận đơn hàng kèm mã đơn hàng. Nhân viên chăm sóc khách hàng có thể liên hệ để xác nhận thêm thông tin khi cần thiết."
+      ]
+    },
+    {
+      "title": "2. Phương thức thanh toán",
+      "paragraphs": [
+        "Chúng tôi hỗ trợ thanh toán qua ví MoMo và các phương thức thanh toán trực tuyến được hiển thị tại trang thanh toán.",
+        "Đơn hàng chỉ được xử lý sau khi thanh toán thành công. Trong trường hợp thanh toán thất bại, quý khách vui lòng thử lại hoặc liên hệ bộ phận hỗ trợ."
+      ]
+    },
+    {
+      "title": "3. Xác nhận và xử lý đơn hàng",
+      "paragraphs": [
+        "Thời gian xác nhận đơn hàng trong vòng 24 giờ làm việc kể từ khi nhận được thanh toán hợp lệ.",
+        "Áo Dài Believe có quyền từ chối hoặc hủy đơn hàng nếu phát hiện thông tin không chính xác, gian lận hoặc sản phẩm hết hàng. Trong trường hợp này, chúng tôi sẽ thông báo và hoàn tiền (nếu đã thanh toán) trong thời gian sớm nhất."
+      ]
+    },
+    {
+      "title": "4. Giá sản phẩm và khuyến mãi",
+      "paragraphs": [
+        "Giá sản phẩm được niêm yết trên website đã bao gồm thuế VAT (nếu có áp dụng) và chưa bao gồm phí vận chuyển.",
+        "Các chương trình khuyến mãi có thời hạn và điều kiện riêng, được công bố công khai trên website hoặc fanpage chính thức."
+      ]
+    }
+  ]
+}

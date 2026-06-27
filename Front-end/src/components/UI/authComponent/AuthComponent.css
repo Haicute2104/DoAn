@@ -78,6 +78,17 @@
   margin: 0;
 }
 
+.auth-brand-logo {
+  width: 180px;
+  max-width: 80%;
+  height: auto;
+  margin-bottom: 16px;
+  object-fit: contain;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
 .slogan-section p {
   text-align: center;
   font-size: 14px;

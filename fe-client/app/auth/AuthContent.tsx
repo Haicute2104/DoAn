@@ -6,6 +6,7 @@ import { loginAction, registerUser, forgotPasswordAction } from '@/components/se
 import { useAuth } from '@/components/providers/AuthProvider';
 import './auth.css';
 import { useAlert } from '@/components/providers/AlertProvider';
+import { validateFullName } from '@/lib/validation';
 
 type AuthView = 'login' | 'register' | 'forgot';
 
@@ -229,7 +230,8 @@ export default function AuthContent() {
     const errors: FormErrors = {};
     if (!registerEmail.trim()) errors.email = 'Vui lòng nhập email!';
     else if (!/\S+@\S+\.\S+/.test(registerEmail)) errors.email = 'Email không hợp lệ!';
-    if (!registerName.trim()) errors.name = 'Vui lòng nhập họ và tên!';
+    const nameResult = validateFullName(registerName);
+    if (!nameResult.valid) errors.name = nameResult.message;
     if (!registerPassword) errors.password = 'Mật khẩu không được để trống.';
     else if (registerPassword.length < 8) errors.password = 'Mật khẩu phải có ít nhất 8 ký tự.';
     else if (!/(?=.*[a-z])/.test(registerPassword)) errors.password = 'Mật khẩu phải chứa ít nhất một chữ cái thường.';

@@ -208,6 +208,7 @@ export default function AddressPicker({
         <Input
           placeholder="Ví dụ: 123 Nguyễn Huệ"
           value={street}
+          maxLength={200}
           onChange={(e) => handleStreetChange(e.target.value)}
         />
       </div>

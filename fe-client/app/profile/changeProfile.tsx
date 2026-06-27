@@ -12,6 +12,13 @@ import { Input } from "@/components/UI/input";
 import { AuthUser } from "@/components/services/auth.services";
 import { PencilLine } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import {
+  sanitizePhoneInput,
+  validateDateOfBirth,
+  validateEmail,
+  validateFullName,
+  validatePhone,
+} from "@/lib/validation";
 
 type FormState = {
   fullName: string;
@@ -31,6 +38,7 @@ function ChangeProfile({
   const [disabled, setDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const { showAlert } = useAlert();
   
 
@@ -46,7 +54,7 @@ function ChangeProfile({
   useEffect(() => {
     setForm({
       fullName: user.fullName ?? "",
-      phone: user.phone ?? "",
+      phone: sanitizePhoneInput(user.phone ?? ""),
       email: user.email ?? "",
       dateOfBirth: user.dateOfBirth
         ? new Date(user.dateOfBirth)
@@ -70,16 +78,37 @@ function ChangeProfile({
     }
   
     setError(null);
+    setFieldErrors({});
   }, [isEditing, user]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const errors: Record<string, string> = {};
+    const fullNameResult = validateFullName(form.fullName);
+    if (!fullNameResult.valid) errors.fullName = fullNameResult.message;
+
+    const phoneResult = validatePhone(form.phone, { required: false });
+    if (!phoneResult.valid) errors.phone = phoneResult.message;
+
+    const emailResult = validateEmail(form.email, { required: true });
+    if (!emailResult.valid) errors.email = emailResult.message;
+
+    const dobResult = validateDateOfBirth(form.dateOfBirth, { required: false });
+    if (!dobResult.valid) errors.dateOfBirth = dobResult.message;
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    setFieldErrors({});
     setLoading(true);
     try {
       const payload: UpdateProfilePayload = {
         fullName: form.fullName.trim() || undefined,
-        phone: form.phone.trim() || undefined,
+        phone: sanitizePhoneInput(form.phone) || undefined,
         email: form.email.trim() || undefined,
         dateOfBirth: form.dateOfBirth
           ? form.dateOfBirth.toISOString().split("T")[0]
@@ -136,10 +165,14 @@ function ChangeProfile({
               type="text"
               value={form.fullName}
               disabled={!isEditing}
+              maxLength={50}
               onChange={(e) =>
                 setForm((prev) => ({ ...prev, fullName: e.target.value }))
               }
             />
+            {fieldErrors.fullName && (
+              <p className="text-xs text-red-500">{fieldErrors.fullName}</p>
+            )}
           </div>
           <div className="space-y-2 flex flex-col">
             <label className="text-sm text-gray-500 font-medium">
@@ -154,6 +187,9 @@ function ChangeProfile({
               disabled={!isEditing}
               placeholder="Chọn ngày"
             />
+            {fieldErrors.dateOfBirth && (
+              <p className="text-xs text-red-500">{fieldErrors.dateOfBirth}</p>
+            )}
           </div>
         </div>
 
@@ -165,12 +201,21 @@ function ChangeProfile({
             id="phone"
             name="phone"
             type="tel"
+            inputMode="numeric"
+            placeholder="0xxxxxxxxx"
+            maxLength={10}
             value={form.phone}
             disabled={!isEditing}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, phone: e.target.value }))
+              setForm((prev) => ({
+                ...prev,
+                phone: sanitizePhoneInput(e.target.value),
+              }))
             }
           />
+          {fieldErrors.phone && (
+            <p className="text-xs text-red-500">{fieldErrors.phone}</p>
+          )}
         </div>
 
         <div className="space-y-2 flex flex-col">
@@ -183,10 +228,14 @@ function ChangeProfile({
             type="email"
             value={form.email}
             disabled={!isEditing}
+            maxLength={100}
             onChange={(e) =>
               setForm((prev) => ({ ...prev, email: e.target.value }))
             }
           />
+          {fieldErrors.email && (
+            <p className="text-xs text-red-500">{fieldErrors.email}</p>
+          )}
         </div>
 
         {isEditing && (

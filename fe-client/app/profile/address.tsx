@@ -25,6 +25,10 @@ import AddressPicker, { AddressValue } from "@/components/UI/AddressPicker";
 import { useAlert } from "@/components/providers/AlertProvider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/UI/popover";
 import { Checkbox } from "@/components/UI/checkbox";
+import {
+  sanitizePhoneInput,
+  validateAddressForm,
+} from "@/lib/validation";
 
 interface AddressItem {
   _id?: string;
@@ -43,6 +47,8 @@ function Address() {
   const [listAddress, setListAddress] = useState<AddressItem[]>([]);
   const [editingAddress, setEditingAddress] = useState<AddressItem | null>(null);
   const [formAddress, setFormAddress] = useState<AddressValue | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [formPhone, setFormPhone] = useState("");
   // load address
   useEffect(() => {
     const fetchAddress = async () => {
@@ -60,12 +66,32 @@ function Address() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    const fullName = (formData.get("fullName") as string) ?? "";
+    const phone = formPhone || ((formData.get("phone") as string) ?? "");
+    const addressValue: AddressValue = {
+      street: formAddress?.street ?? "",
+      ward: formAddress?.ward ?? "",
+      province: formAddress?.province ?? "",
+    };
+
+    const errors = validateAddressForm({
+      fullName,
+      phone,
+      address: addressValue,
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    setFieldErrors({});
     const data: AddressPayload = {
-      fullName: formData.get("fullName") as string,
-      phone: formData.get("phone") as string,
-      street: formAddress?.street as string,
-      ward: formAddress?.ward as string,
-      province: formAddress?.province as string
+      fullName: fullName.trim(),
+      phone: sanitizePhoneInput(phone),
+      street: addressValue.street,
+      ward: addressValue.ward,
+      province: addressValue.province,
     };
     try {
       let res;
@@ -78,6 +104,8 @@ function Address() {
       setOpen(false);
       setEditingAddress(null);
       setFormAddress(null);
+      setFormPhone("");
+      setFieldErrors({});
       setReload(!reload);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Có lỗi xảy ra";
@@ -92,6 +120,8 @@ function Address() {
       ward: item.ward ?? "",
       province: item.province ?? ""
     });
+    setFormPhone(item.phone ?? "");
+    setFieldErrors({});
     setOpen(true);
   };
   // delete
@@ -132,11 +162,22 @@ function Address() {
             if (!value) {
               setEditingAddress(null);
               setFormAddress(null);
+              setFormPhone("");
+              setFieldErrors({});
             }
           }}
         >
           <DialogTrigger asChild>
-            <button className="flex items-center gap-2 text-[#D4AF37] hover:text-[#8B1E26] transition">
+            <button
+              type="button"
+              className="flex items-center gap-2 text-[#D4AF37] hover:text-[#8B1E26] transition"
+              onClick={() => {
+                setEditingAddress(null);
+                setFormAddress(null);
+                setFormPhone("");
+                setFieldErrors({});
+              }}
+            >
               <Plus className="w-4 h-4" />
               Thêm địa chỉ mới
             </button>
@@ -160,7 +201,11 @@ function Address() {
                     required
                     defaultValue={editingAddress?.fullName}
                     placeholder="Nhập họ và tên"
+                    maxLength={50}
                   />
+                  {fieldErrors.fullName && (
+                    <p className="text-xs text-red-500">{fieldErrors.fullName}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Số điện thoại</Label>
@@ -168,9 +213,18 @@ function Address() {
                     id="phone"
                     name="phone"
                     required
-                    defaultValue={editingAddress?.phone}
-                    placeholder="Nhập số điện thoại"
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="0xxxxxxxxx"
+                    maxLength={10}
+                    value={formPhone}
+                    onChange={(e) =>
+                      setFormPhone(sanitizePhoneInput(e.target.value))
+                    }
                   />
+                  {fieldErrors.phone && (
+                    <p className="text-xs text-red-500">{fieldErrors.phone}</p>
+                  )}
 
                 </div>
 
@@ -182,8 +236,22 @@ function Address() {
                   ward: formAddress?.ward,
                   province: formAddress?.province,
                 }}
-                onChange={(address) => setFormAddress(address)}
+                onChange={(address) => {
+                  setFormAddress(address);
+                  setFieldErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.province;
+                    delete next.ward;
+                    delete next.street;
+                    return next;
+                  });
+                }}
               />
+              {(fieldErrors.province || fieldErrors.ward || fieldErrors.street) && (
+                <p className="text-xs text-red-500">
+                  {fieldErrors.province || fieldErrors.ward || fieldErrors.street}
+                </p>
+              )}
               <DialogFooter>
                 <Button
                   type="submit"
@@ -224,7 +292,7 @@ function Address() {
              <div>
              <p className="font-semibold">{item.fullName}</p>
               <p>{item.phone}</p>
-              <p>
+              <p className="max-w-xs line-clamp-2">
                 {item.street}, {item.ward}, {item.province}
               </p>
              </div>

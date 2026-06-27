@@ -18,8 +18,13 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Áo dài Hải cutee",
-  description: "Áo dài Hải cutee",
+  title: "Áo Dài Believe",
+  description: "Áo Dài Believe - Thương hiệu áo dài truyền thống",
+  icons: {
+    icon: "/images/logo.png",
+    shortcut: "/images/logo.png",
+    apple: "/images/logo.png",
+  },
 };
 
 export default function RootLayout({
